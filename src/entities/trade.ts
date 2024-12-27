@@ -9,9 +9,9 @@ import {
   sortedInsert,
   wrappedCurrency,
   TradeType,
-  wrappedCurrencyAmount
+  wrappedCurrencyAmount,
+  computePriceImpact, Token
 } from '@uniswap/sdk-core'
-import { computePriceImpact, Token } from '../../../../sdk-core'
 import { ONE, ZERO } from '../constants'
 import invariant from 'tiny-invariant'
 
