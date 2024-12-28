@@ -5,22 +5,13 @@ import {
   sqrt,
   Token,
   CurrencyAmount,
-} from '@uniswap/sdk-core';
+} from '@alagunoff/uniswap-sdk-core';
 import invariant from 'tiny-invariant';
 import JSBI from 'jsbi';
 import { pack, keccak256 } from '@ethersproject/solidity';
 import { getCreate2Address } from '@ethersproject/address';
 
-import {
-  FACTORY_ADDRESS,
-  INIT_CODE_HASH,
-  MINIMUM_LIQUIDITY,
-  FIVE,
-  _997,
-  _1000,
-  ONE,
-  ZERO,
-} from '../constants';
+import { MINIMUM_LIQUIDITY, FIVE, _997, _1000, ONE, ZERO } from '../constants';
 import {
   InsufficientReservesError,
   InsufficientInputAmountError,
@@ -30,10 +21,12 @@ export const computePairAddress = ({
   factoryAddress,
   tokenA,
   tokenB,
+  pairInitCodeHash,
 }: {
   factoryAddress: string;
   tokenA: Token;
   tokenB: Token;
+  pairInitCodeHash: string;
 }): string => {
   const [token0, token1] = tokenA.sortsBefore(tokenB)
     ? [tokenA, tokenB]
@@ -44,24 +37,18 @@ export const computePairAddress = ({
       ['bytes'],
       [pack(['address', 'address'], [token0.address, token1.address])],
     ),
-    INIT_CODE_HASH,
+    pairInitCodeHash,
   );
 };
 export class Pair {
   public readonly liquidityToken: Token;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
-    return computePairAddress({
-      factoryAddress: FACTORY_ADDRESS,
-      tokenA,
-      tokenB,
-    });
-  }
-
   public constructor(
+    factoryAddress: string,
     currencyAmountA: CurrencyAmount<Token>,
     tokenAmountB: CurrencyAmount<Token>,
+    pairInitCodeHash: string,
   ) {
     const tokenAmounts = currencyAmountA.currency.sortsBefore(
       tokenAmountB.currency,
@@ -70,7 +57,12 @@ export class Pair {
       : [tokenAmountB, currencyAmountA];
     this.liquidityToken = new Token(
       tokenAmounts[0].currency.chainId,
-      Pair.getAddress(tokenAmounts[0].currency, tokenAmounts[1].currency),
+      computePairAddress({
+        factoryAddress,
+        tokenA: tokenAmounts[0].currency,
+        tokenB: tokenAmounts[1].currency,
+        pairInitCodeHash,
+      }),
       18,
       'UNI-V2',
       'Uniswap V2',
@@ -154,6 +146,8 @@ export class Pair {
 
   public getOutputAmount(
     inputAmount: CurrencyAmount<Token>,
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): [CurrencyAmount<Token>, Pair] {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN');
     if (
@@ -182,14 +176,18 @@ export class Pair {
     return [
       outputAmount,
       new Pair(
+        factoryAddress,
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
+        pairInitCodeHash,
       ),
     ];
   }
 
   public getInputAmount(
     outputAmount: CurrencyAmount<Token>,
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): [CurrencyAmount<Token>, Pair] {
     invariant(this.involvesToken(outputAmount.currency), 'TOKEN');
     if (
@@ -222,8 +220,10 @@ export class Pair {
     return [
       inputAmount,
       new Pair(
+        factoryAddress,
         inputReserve.add(inputAmount),
         outputReserve.subtract(outputAmount),
+        pairInitCodeHash,
       ),
     ];
   }

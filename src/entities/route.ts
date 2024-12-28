@@ -5,7 +5,7 @@ import {
   Price,
   Token,
   wrappedCurrency,
-} from '@uniswap/sdk-core';
+} from '@alagunoff/uniswap-sdk-core';
 
 import { Pair } from './pair';
 

@@ -12,7 +12,7 @@ import {
   wrappedCurrencyAmount,
   computePriceImpact,
   Token,
-} from '@uniswap/sdk-core';
+} from '@alagunoff/uniswap-sdk-core';
 import { ONE, ZERO } from '../constants';
 import invariant from 'tiny-invariant';
 
@@ -134,8 +134,16 @@ export class Trade<
   public static exactIn<TInput extends Currency, TOutput extends Currency>(
     route: Route<TInput, TOutput>,
     amountIn: CurrencyAmount<TInput>,
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): Trade<TInput, TOutput, TradeType.EXACT_INPUT> {
-    return new Trade(route, amountIn, TradeType.EXACT_INPUT);
+    return new Trade(
+      route,
+      amountIn,
+      TradeType.EXACT_INPUT,
+      factoryAddress,
+      pairInitCodeHash,
+    );
   }
 
   /**
@@ -146,8 +154,16 @@ export class Trade<
   public static exactOut<TInput extends Currency, TOutput extends Currency>(
     route: Route<TInput, TOutput>,
     amountOut: CurrencyAmount<TOutput>,
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT> {
-    return new Trade(route, amountOut, TradeType.EXACT_OUTPUT);
+    return new Trade(
+      route,
+      amountOut,
+      TradeType.EXACT_OUTPUT,
+      factoryAddress,
+      pairInitCodeHash,
+    );
   }
 
   public constructor(
@@ -156,6 +172,8 @@ export class Trade<
       ? CurrencyAmount<TInput>
       : CurrencyAmount<TOutput>,
     tradeType: TTradeType,
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ) {
     this.route = route;
     this.tradeType = tradeType;
@@ -166,7 +184,11 @@ export class Trade<
       tokenAmounts[0] = wrappedCurrencyAmount(amount, route.chainId);
       for (let i = 0; i < route.path.length - 1; i++) {
         const pair = route.pairs[i];
-        const [outputAmount] = pair.getOutputAmount(tokenAmounts[i]);
+        const [outputAmount] = pair.getOutputAmount(
+          tokenAmounts[i],
+          factoryAddress,
+          pairInitCodeHash,
+        );
         tokenAmounts[i + 1] = outputAmount;
       }
       this.inputAmount = CurrencyAmount.fromFractionalAmount(
@@ -187,7 +209,11 @@ export class Trade<
       );
       for (let i = route.path.length - 1; i > 0; i--) {
         const pair = route.pairs[i - 1];
-        const [inputAmount] = pair.getInputAmount(tokenAmounts[i]);
+        const [inputAmount] = pair.getInputAmount(
+          tokenAmounts[i],
+          factoryAddress,
+          pairInitCodeHash,
+        );
         tokenAmounts[i - 1] = inputAmount;
       }
       this.inputAmount = CurrencyAmount.fromFractionalAmount(
@@ -279,6 +305,8 @@ export class Trade<
     currentPairs: Pair[] = [],
     nextAmountIn: CurrencyAmount<Currency> = currencyAmountIn,
     bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = [],
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] {
     invariant(pairs.length > 0, 'PAIRS');
     invariant(maxHops > 0, 'MAX_HOPS');
@@ -308,7 +336,11 @@ export class Trade<
 
       let amountOut: CurrencyAmount<Token>;
       try {
-        [amountOut] = pair.getOutputAmount(amountIn);
+        [amountOut] = pair.getOutputAmount(
+          amountIn,
+          factoryAddress,
+          pairInitCodeHash,
+        );
       } catch (error) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -328,6 +360,8 @@ export class Trade<
             ),
             currencyAmountIn,
             TradeType.EXACT_INPUT,
+            factoryAddress,
+            pairInitCodeHash,
           ),
           maxNumResults,
           tradeComparator,
@@ -349,6 +383,8 @@ export class Trade<
           [...currentPairs, pair],
           amountOut,
           bestTrades,
+          factoryAddress,
+          pairInitCodeHash,
         );
       }
     }
@@ -398,6 +434,8 @@ export class Trade<
     currentPairs: Pair[] = [],
     nextAmountOut: CurrencyAmount<Currency> = currencyAmountOut,
     bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = [],
+    factoryAddress: string,
+    pairInitCodeHash: string,
   ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] {
     invariant(pairs.length > 0, 'PAIRS');
     invariant(maxHops > 0, 'MAX_HOPS');
@@ -426,7 +464,11 @@ export class Trade<
 
       let amountIn: CurrencyAmount<Token>;
       try {
-        [amountIn] = pair.getInputAmount(amountOut);
+        [amountIn] = pair.getInputAmount(
+          amountOut,
+          factoryAddress,
+          pairInitCodeHash,
+        );
       } catch (error) {
         // not enough liquidity in this pair
         if (error.isInsufficientReservesError) {
@@ -446,6 +488,8 @@ export class Trade<
             ),
             currencyAmountOut,
             TradeType.EXACT_OUTPUT,
+            factoryAddress,
+            pairInitCodeHash,
           ),
           maxNumResults,
           tradeComparator,
@@ -467,6 +511,8 @@ export class Trade<
           [pair, ...currentPairs],
           amountIn,
           bestTrades,
+          factoryAddress,
+          pairInitCodeHash,
         );
       }
     }
