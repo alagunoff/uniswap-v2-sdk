@@ -1,45 +1,51 @@
 {
-  "name": "@uniswap/v2-sdk",
+  "name": "@alagunoff/uniswap-v2-sdk",
   "license": "MIT",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0",
   "description": "🛠 An SDK for building applications on top of Uniswap V2",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/Uniswap/uniswap-v2-sdk.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Uniswap/uniswap-v2-sdk.git"
+  },
   "keywords": [
     "uniswap",
     "ethereum"
   ],
   "module": "dist/v2-sdk.esm.js",
+  "engines": {
+    "node": "16.20.2"
+  },
   "scripts": {
-    "lint": "tsdx lint src test",
-    "build": "tsdx build",
+    "prepublishOnly": "tsdx build",
     "start": "tsdx watch",
-    "test": "tsdx test",
-    "prepublishOnly": "tsdx build"
+    "prettier:fix": "prettier . --write --ignore-unknown",
+    "build": "tsdx build"
   },
   "dependencies": {
-    "@ethersproject/address": "^5.0.0",
-    "@ethersproject/solidity": "^5.0.0",
-    "@uniswap/sdk-core": "file:../sdk-core",
-    "tiny-invariant": "^1.1.0",
-    "tiny-warning": "^1.0.3"
+    "@alagunoff/uniswap-sdk-core": "3.0.0",
+    "@ethersproject/address": "5.0.0",
+    "@ethersproject/solidity": "5.0.0",
+    "tiny-invariant": "1.1.0",
+    "tiny-warning": "1.0.3"
   },
   "devDependencies": {
-    "@types/big.js": "^4.0.5",
-    "@types/jest": "^24.0.25",
-    "@uniswap/v2-core": "^1.0.1",
-    "tsdx": "^0.14.1"
-  },
-  "engines": {
-    "node": ">=10"
+    "@types/big.js": "4.0.5",
+    "@uniswap/v2-core": "1.0.1",
+    "prettier": "3.4.2",
+    "tsdx": "0.14.1"
   },
   "prettier": {
-    "printWidth": 120,
-    "semi": false,
-    "singleQuote": true
-  }
+    "singleQuote": true,
+    "endOfLine": "auto"
+  },
+  "bugs": {
+    "url": "https://github.com/Uniswap/uniswap-v2-sdk/issues"
+  },
+  "homepage": "https://github.com/Uniswap/uniswap-v2-sdk#readme",
+  "author": ""
 }
