@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Uniswap/uniswap-v2-sdk.git"
+    "url": "git+https://github.com/alagunoff/uniswap-v2-sdk.git"
   },
   "keywords": [
     "uniswap",
@@ -44,8 +44,8 @@
     "endOfLine": "auto"
   },
   "bugs": {
-    "url": "https://github.com/Uniswap/uniswap-v2-sdk/issues"
+    "url": "https://github.com/alagunoff/uniswap-v2-sdk/issues"
   },
-  "homepage": "https://github.com/Uniswap/uniswap-v2-sdk#readme",
+  "homepage": "https://github.com/alagunoff/uniswap-v2-sdk#readme",
   "author": ""
 }
