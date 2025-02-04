@@ -27,7 +27,7 @@
     "build": "tsdx build"
   },
   "dependencies": {
-    "@alagunoff/uniswap-sdk-core": "3.0.0",
+    "@alagunoff/uniswap-sdk-core": "3.1.0",
     "@ethersproject/address": "5.0.0",
     "@ethersproject/solidity": "5.0.0",
     "tiny-invariant": "1.1.0",
